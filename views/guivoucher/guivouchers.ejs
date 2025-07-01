@@ -1,0 +1,62 @@
+<%- include('../main/header.ejs') %>
+
+    <div class="container mt-4">
+        <!-- Tiêu đề -->
+        <h1 class="text-center text-primary mb-4">Gửi Voucher: <%= voucher.maGiamGia %>
+        </h1>
+
+        <form action="/web/guivouchers/<%= voucher._id %>" method="GET" class="mb-3">
+            <input type="text" name="q" class="form-control" placeholder="Tìm kiếm người dùng theo tên hoặc email..." />
+        </form>
+        <!-- Form -->
+        <form action="post/<%= voucher._id %>" method="POST" class="shadow p-4 rounded bg-light">
+            <h4 class="mb-3">Chọn người dùng để gửi voucher:</h4>
+
+            <!-- Nút chọn tất cả/bỏ chọn -->
+            <div class="mb-3">
+                <button type="button" id="selectAllBtn" class="btn btn-primary btn-sm">Chọn tất cả</button>
+                <button type="button" id="deselectAllBtn" class="btn btn-secondary btn-sm">Bỏ chọn tất cả</button>
+            </div>
+
+            <!-- Danh sách người dùng -->
+            <div class="form-check mb-3">
+                <div class="row gx-5">
+                    <% users.forEach(user=> { %>
+                        <div class="col-md-6">
+                            <div class="border-bottom py-2">
+                                <input class="form-check-input" type="checkbox" name="userIds" value="<%= user._id %>"
+                                    id="user-<%= user._id %>">
+                                <label class="form-check-label" for="user-<%= user._id %>">
+                                    <strong>
+                                        <%= user.tenNguoiDung %>
+                                    </strong> (<%= user.email %>)
+                                </label>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+
+            <!-- Nút gửi -->
+            <button type="submit" class="btn btn-success w-100 mt-3">Gửi Voucher</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const checkboxes = document.querySelectorAll('.form-check-input');
+
+            // Xử lý chọn tất cả
+            selectAllBtn.addEventListener('click', () => {
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+            });
+
+            // Xử lý bỏ chọn tất cả
+            deselectAllBtn.addEventListener('click', () => {
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+            });
+        });
+    </script>
+
+    <%- include('../main/footer.ejs') %>

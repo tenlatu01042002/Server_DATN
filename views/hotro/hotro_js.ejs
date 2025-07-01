@@ -1,0 +1,37 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editButtons = document.querySelectorAll('.btn-edit-dichvu');
+        const serviceForm = document.getElementById('serviceForm');
+        const serviceModalLabel = document.getElementById('serviceModalLabel');
+
+        // Khi nhấn nút "Sửa"
+        editButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const serviceId = button.getAttribute('data-id');
+                const trangThai = button.getAttribute('data-trangThai');
+                const tenNguoiDung = button.getAttribute('data-tenNguoiDung');
+                const vanDe = button.getAttribute('data-vanDe');
+                const phanHoi = button.getAttribute('data-phanHoi');
+
+                // Đặt action của form là PUT cho cập nhật dịch vụ
+                serviceForm.action = `/web/hotros/put/${serviceId}?_method=PUT`;
+                // Đặt tiêu đề modal là "Cập nhật dịch vụ"
+                document.getElementById('serviceModalLabel').textContent = 'Cập nhật trạng thái hỗ trợ của ' + tenNguoiDung;
+
+                // Điền các thông tin vào form
+                document.getElementById('trangThai').value = trangThai;
+                document.getElementById('vanDe').value = vanDe;
+                document.getElementById('phanHoi').value = phanHoi;
+                
+                
+            });
+        });
+
+        // Reset form khi đóng modal
+        const serviceModal = document.getElementById('serviceModal');
+        serviceModal.addEventListener('hidden.bs.modal', () => {
+            // Reset dữ liệu trong các trường nhập liệu và ảnh
+            serviceForm.reset(); // Reset tất cả các trường input
+        });
+    });
+</script>

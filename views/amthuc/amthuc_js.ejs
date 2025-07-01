@@ -1,0 +1,129 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Modal chi tiết nhà hàng
+        const detailModal = document.getElementById('detailModal');
+        const tenNhaHangDetail = document.getElementById('tenNhaHangDetail');
+        const moTaDetail = document.getElementById('moTaDetail');
+        const hinhAnhDetail = document.getElementById('hinhAnhDetail');
+        const hinhMenuDetail = document.getElementById('hinhMenuDetail');
+        const gioMoCuaDetail = document.getElementById('gioMoCuaDetail');
+        const gioDongCuaDetail = document.getElementById('gioDongCuaDetail');
+        const viTriDetail = document.getElementById('viTriDetail');
+        const hotlineDetail = document.getElementById('hotlineDetail');
+
+        // Khi người dùng nhấn vào tên nhà hàng để xem chi tiết
+        document.querySelectorAll('.btn-detail-amthuc').forEach(button => {
+            button.addEventListener('click', function () {
+                const tenNhaHang = this.dataset.ten;
+                const moTa = this.dataset.mota;
+                const hinhAnh = this.dataset.hinhanh;
+                const hinhMenu = JSON.parse(this.dataset.hinhmenu || '[]');
+                const gioMoCua = this.dataset.giomocua;
+                const gioDongCua = this.dataset.giodongcua;
+                const viTri = this.dataset.vitri;
+                const hotline = this.dataset.hotline;
+
+                // Cập nhật modal chi tiết
+                tenNhaHangDetail.textContent = tenNhaHang;
+                moTaDetail.textContent = moTa || 'Không có mô tả';
+                hinhAnhDetail.src = hinhAnh || '';
+                gioMoCuaDetail.textContent = gioMoCua || 'Không rõ';
+                gioDongCuaDetail.textContent = gioDongCua || 'Không rõ';
+                viTriDetail.textContent = viTri || 'Không rõ';
+                hotlineDetail.textContent = hotline || 'Không rõ';
+
+                // Hiển thị hình menu
+                hinhMenuDetail.innerHTML = '';
+                if (hinhMenu.length > 0) {
+                    hinhMenu.forEach(img => {
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-6';
+                        const imgElement = document.createElement('img');
+                        imgElement.src = img;
+                        imgElement.className = 'img-fluid';
+                        colDiv.appendChild(imgElement);
+                        hinhMenuDetail.appendChild(colDiv);
+                    });
+                } else {
+                    hinhMenuDetail.innerHTML = '<p>Không có hình ảnh menu.</p>';
+                }
+            });
+        });
+
+        // Khi người dùng nhấn nút thêm nhà hàng
+        const amthucForm = document.getElementById('amthucForm');
+        document.getElementById('addAmThucBtn').addEventListener('click', function () {
+            amthucForm.reset();
+            amthucForm.action = '/web/amthucs/post';
+            document.getElementById('amthucId').value = '';
+            document.getElementById('amthucModalLabel').textContent = 'Thêm Nhà Hàng';
+        });
+
+        // Khi người dùng nhấn nút sửa nhà hàng
+        document.querySelectorAll('.btn-edit-amthuc').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const tenNhaHang = this.dataset.ten;
+                const moTa = this.dataset.mota;
+                const hinhAnh = this.dataset.hinhanh;
+                const gioMoCua = this.dataset.giomocua;
+                const gioDongCua = this.dataset.giodongcua;
+                const viTri = this.dataset.vitri;
+                const hotline = this.dataset.hotline;
+
+                document.getElementById('amthucId').value = id;
+                document.getElementById('tenNhaHang').value = tenNhaHang;
+                document.getElementById('moTa').value = moTa;
+                document.getElementById('images').required = false; // Không bắt buộc khi sửa
+                document.getElementById('gioMoCua').value = gioMoCua;
+                document.getElementById('gioDongCua').value = gioDongCua;
+                document.getElementById('viTri').value = viTri;
+                document.getElementById('hotline').value = hotline;
+
+                // Cập nhật URL hành động của form khi sửa
+                amthucForm.action = `/web/amthucs/put/${id}?_method=PUT`;
+                document.getElementById('amthucModalLabel').textContent = 'Sửa Nhà Hàng';
+            });
+        });
+
+
+
+
+        
+        // Kiểm tra số lượng file hình ảnh phụ
+        
+        
+        
+        
+        
+        document.getElementById('menu').addEventListener('change', function () {
+            const maxFiles = 5;
+            const fileError = document.getElementById('fileError');
+            if (this.files.length > maxFiles) {
+                fileError.textContent = `Bạn chỉ có thể tải lên tối đa ${maxFiles} ảnh.`;
+                this.value = '';
+            } else {
+                fileError.textContent = '';
+            }
+        });
+
+        // Khi người dùng nhấn nút xóa nhà hàng
+        document.querySelectorAll('.btn-delete-amthuc').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const tenNhaHang = this.dataset.ten;
+                document.getElementById('amThucName').textContent = tenNhaHang;
+                const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+                confirmDeleteButton.action = `/web/amthucs/delete/${id}?_method=DELETE`;
+            });
+        });
+
+        // Tự động ẩn thông báo sau 3 giây
+        const successMessage = document.getElementById('successMessage');
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+    });
+</script>

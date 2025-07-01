@@ -1,0 +1,239 @@
+</main>
+</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const socket = io("http://localhost:3000");
+
+    socket.emit('join-admin-room'); // Tham gia admin-room
+
+    const notificationList = document.getElementById('notificationList');
+    const notificationDetailsContainer = document.getElementById('notificationDetailsContainer');
+    const notificationDetails = document.getElementById('notificationDetails');
+    const backToList = document.getElementById('backToList');
+    const notificationBadge = document.getElementById('notificationBadge');
+    const filterUnreadNotifications = document.getElementById('filterUnreadNotifications');
+    const filterReadNotifications = document.getElementById('filterReadNotifications');
+
+    const dbNotifications = []; // Danh sách thông báo từ DB
+
+    // Cập nhật số thông báo chưa đọc
+    function updateNotificationBadge() {
+      const unreadCount = dbNotifications.filter(notification => notification.trangThai).length;
+      notificationBadge.textContent = unreadCount; // Hiển thị số lượng chưa đọc
+      notificationBadge.classList.toggle('d-none', unreadCount === 0);
+    }
+
+    // Cập nhật danh sách thông báo hiển thị
+    function updateNotificationList(notifications) {
+      notificationList.innerHTML = ''; // Xóa danh sách cũ
+      notifications.forEach((notification, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = `list-group-item d-flex align-items-center notification-item ${notification.trangThai ? 'unread' : 'read'}`;
+        listItem.dataset.index = index;
+
+        // Avatar
+        const avatar = document.createElement('img');
+        avatar.src = notification.avatar || '/public/images/avatar.png'; // Avatar mặc định nếu không có
+        avatar.alt = 'Avatar';
+        avatar.className = 'rounded-circle me-3';
+        avatar.style.width = '40px';
+        avatar.style.height = '40px';
+
+        // Nội dung thông báo
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'notification-content';
+
+        // Tiêu đề
+        const title = document.createElement('span');
+        title.textContent = notification.tieuDe || notification.message;
+        title.className = 'd-block fw-bold';
+
+        // Thời gian
+        const date = new Date(notification.ngayGui);
+        const time = document.createElement('small');
+        time.textContent = date.toLocaleString('vi-VN', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        });
+        time.className = 'text-muted';
+
+        // Gắn các thành phần vào danh sách
+        contentContainer.appendChild(title);
+        contentContainer.appendChild(time);
+        listItem.appendChild(avatar);
+        listItem.appendChild(contentContainer);
+        notificationList.appendChild(listItem);
+      });
+    }
+
+    // Lọc danh sách thông báo
+    function filterNotifications(isUnread) {
+      const filteredNotifications = dbNotifications.filter(notification => notification.trangThai === isUnread);
+      updateNotificationList(filteredNotifications);
+    }
+
+    // Xử lý khi chọn "Chưa đọc"
+    filterUnreadNotifications.addEventListener('click', () => {
+      // filterUnreadNotifications.classList.add('btn-primary');
+      // filterReadNotifications.classList.remove('btn-primary');
+      filterNotifications(true); // Hiển thị thông báo chưa đọc
+    });
+
+    // Xử lý khi chọn "Đã đọc"
+    filterReadNotifications.addEventListener('click', () => {
+      // filterUnreadNotifications.classList.remove('btn-primary');
+      // filterReadNotifications.classList.add('btn-primary');
+      filterNotifications(false); // Hiển thị thông báo đã đọc
+    });
+
+    // Lấy danh sách thông báo từ DB
+    async function fetchAllNotifications() {
+      try {
+        const response = await fetch('/web/thongbaos/admin/');
+        const data = await response.json();
+        if (data.status === 200) {
+          dbNotifications.length = 0; // Reset danh sách cũ
+          dbNotifications.push(...data.notifications); // Thêm thông báo từ DB
+          updateNotificationList(dbNotifications); // Cập nhật danh sách hiển thị
+          updateNotificationBadge(); // Cập nhật badge
+        }
+      } catch (error) {
+        console.error('Lỗi khi lấy thông báo từ DB:', error);
+      }
+    }
+
+    // Khi mở modal thông báo, tải danh sách từ DB
+    document.getElementById('notificationModal').addEventListener('show.bs.modal', fetchAllNotifications);
+
+    // Xem chi tiết thông báo
+    notificationList.addEventListener('click', async (e) => {
+      if (e.target.closest('.notification-item')) {
+        const listItem = e.target.closest('.notification-item');
+        const index = listItem.dataset.index;
+        const notification = dbNotifications[index];
+
+        // Gửi yêu cầu cập nhật trạng thái
+        try {
+          const response = await fetch(`/web/thongbaos/${notification._id}/trangthai`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (response.ok) {
+            notification.trangThai = false; // Cập nhật trạng thái trong dữ liệu local
+            listItem.classList.remove('unread'); // Xóa class chưa đọc
+            listItem.classList.add('read'); // Thêm class đã đọc
+            updateNotificationBadge(); // Cập nhật badge
+          } else {
+            console.error('Cập nhật trạng thái thất bại:', await response.json());
+          }
+        } catch (error) {
+          console.error('Lỗi khi gửi yêu cầu cập nhật trạng thái:', error);
+        }
+
+        // Hiển thị chi tiết thông báo
+        document.getElementById('notificationAvatar').src = notification.avatar || '/public/images/avatar.png';
+        document.getElementById('notificationDetailsTitle').textContent = notification.tieuDe || "Chi tiết thông báo";
+        notificationDetails.textContent = notification.noiDung || "Nội dung không khả dụng";
+        const date = new Date(notification.ngayGui);
+        document.getElementById('notificationTime').textContent = `Gửi lúc: ${date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}`;
+
+        notificationList.classList.add('d-none');
+        notificationDetailsContainer.classList.remove('d-none');
+      }
+    });
+
+    // Quay lại danh sách thông báo
+    backToList.addEventListener('click', () => {
+      notificationDetailsContainer.classList.add('d-none');
+      notificationList.classList.remove('d-none');
+    });
+
+    // Xử lý khi có thông báo mới từ server
+    socket.on('new-notification', (data) => {
+      dbNotifications.unshift({
+        ...data.thongBaoData,
+        trangThai: true, // Đánh dấu là chưa đọc
+      });
+
+      // Cập nhật badge và danh sách hiển thị nếu đang ở chế độ "Chưa đọc"
+      updateNotificationBadge();
+      if (filterUnreadNotifications.classList.contains('btn-primary')) {
+        filterNotifications(true);
+      }
+    });
+
+    // Lần đầu tải danh sách
+    fetchAllNotifications();
+  });
+</script>
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"
+  integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+  integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+  integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script>
+<!-- Thêm FullCalendar JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.js"></script>
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+<% if (message) { %>
+
+
+  <script>
+    // Đặt thời gian hiển thị thông báo l
+    setTimeout(function () {
+      var messageElement = document.getElementById("successMessage");
+      if (messageElement) {
+        messageElement.style.display = "none"; // Ẩn thông báo 
+      }
+    }, 3000);
+  </script>
+  <% } %>
+
+    <script>
+      $(document).ready(function () {
+        // Áp dụng DataTable cho các bảng không có lớp 'no-datatable'
+        $('table:not(.no-datatable)').DataTable({
+          "language": {
+            "sProcessing": "Đang xử lý...",
+            "sLengthMenu": "Hiển thị _MENU_ mục",
+            "sZeroRecords": "Không tìm thấy dòng nào phù hợp",
+            "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+            "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+            "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+            "sSearch": "Tìm kiếm:",
+            "oPaginate": {
+              "sFirst": "Đầu",
+              "sPrevious": "Trước",
+              "sNext": "Tiếp",
+              "sLast": "Cuối"
+            }
+          },
+          "lengthMenu": [5, 10, 25, 50], // Số dòng mỗi trang
+          "pageLength": 10, // Mặc định 10 dòng mỗi trang
+          "order": [[0, "asc"]] // Sắp xếp theo cột đầu tiên
+        });
+      });
+    </script>
+
+
+
+    </body>
+
+    </html>

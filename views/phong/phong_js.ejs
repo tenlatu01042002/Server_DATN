@@ -1,0 +1,111 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteButtons = document.querySelectorAll('.btn-delete-phong');
+        const serviceNameElement = document.getElementById('serviceName');
+        const confirmDeleteForm = document.getElementById('confirmDeleteButton'); // Đây là form, không phải link
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const serviceId = button.getAttribute('data-id');
+                const serviceName = button.getAttribute('data-soPhong');
+
+                // Cập nhật tên dịch vụ trong modal
+                serviceNameElement.textContent = serviceName;
+
+                // Cập nhật action của form
+                confirmDeleteForm.action = `/web/phongs/delete/${serviceId}?_method=DELETE`;
+            });
+        });
+    });
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editButtons = document.querySelectorAll('.btn-edit-phong');
+        const serviceForm = document.getElementById('serviceForm');
+        const serviceModalLabel = document.getElementById('serviceModalLabel');
+
+        // Khi nhấn nút "Sửa"
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const phongId = button.getAttribute('data-id');
+                const soPhong = button.getAttribute('data-ten');
+                const idLoaiPhong = button.getAttribute('data-idloaiPhong');
+                const VIP = button.getAttribute('data-VIP');
+                const trangThai = button.getAttribute('data-trangthai');
+
+                console.log(idLoaiPhong)
+                // Đặt action của form là PUT cho cập nhật phòng
+                serviceForm.action = `/web/phongs/put/${phongId}?_method=PUT`;
+                serviceModalLabel.textContent = 'Cập nhật phòng';
+
+                // Điền các thông tin vào form
+                document.getElementById('soPhong').value = soPhong;
+                document.getElementById('id_LoaiPhong').value = idLoaiPhong;
+                document.getElementById('VIP').value = VIP;
+                document.getElementById('trangThai').value = trangThai;
+            });
+        });
+
+        // Reset form khi đóng modal
+        const serviceModal = document.getElementById('serviceModal');
+        serviceModal.addEventListener('hidden.bs.modal', () => {
+            serviceForm.reset(); // Đảm bảo form được reset khi modal đóng
+            serviceModalLabel.textContent = 'Thêm phòng mới'; // Thay đổi lại tiêu đề
+            serviceForm.action = '/web/phongs/post'; // Đặt lại action của form về POST khi thêm phòng
+        });
+    });
+
+</script>
+
+<script>
+    // Khi nhấn nút "Chi tiết", mở modal và hiển thị lịch trạng thái phòng
+    // Hàm này sẽ được gọi khi nhấn nút "Xem chi tiết"
+    function getTrangThaiPhongDetails(phongId) {
+        // Lấy phần tử modal
+        const calendarEl = document.getElementById('calendar');
+
+        // Gửi yêu cầu tới API để lấy dữ liệu trạng thái phòng
+        fetch(`/web/phongs/trangThai/${phongId}`)
+            .then(response => response.json())
+            .then(events => {
+                // Khởi tạo FullCalendar
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth', // Chế độ xem mặc định
+                    events: events, // Dữ liệu sự kiện lấy từ server
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,dayGridWeek',
+                    },
+                    eventColor: 'red', // Màu của sự kiện (có thể thay đổi)
+                });
+
+                // Render lịch
+                calendar.render();
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy trạng thái phòng:', error);
+            });
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterDropdown = document.getElementById('filterTrangThai');
+        filterDropdown.addEventListener('change', () => {
+            const selectedTrangThai = filterDropdown.value;
+            const url = selectedTrangThai ? `/web/phongs?trangThai=${selectedTrangThai}` : `/web/phongs`;
+            window.location.href = url;
+        }); 
+    });
+
+    function submitFilter() {
+    const filterValue = document.getElementById('filterTrangThai').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('trangThai', filterValue);
+    window.location.href = url.toString();
+}
+
+</script>

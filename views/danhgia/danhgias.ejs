@@ -1,0 +1,39 @@
+<%- include('../main/header.ejs') %>
+
+<div class="container">
+    <h1>Danh sách các loại phòng</h1>
+
+    <% if (message) { %>
+        <div class="alert alert-warning" id="successMessage">
+            <%= message %>
+        </div>
+    <% } %>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Tên loại phòng</th>
+                <th>Số lượng đánh giá</th>
+                <th>Điểm trung bình</th>
+                <th>Mức độ đánh giá</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            <% roomTypes.forEach(roomType => { %>
+                <tr>
+                    <td><%= roomType.tenLoaiPhong %></td>
+                    <td><%= roomType.soLuongDanhGia %></td>
+                    <td><%= roomType.diemTrungBinh %></td>
+                    <td><%= roomType.danhGia %></td>
+                    <td>
+                        <a href="/web/danhgias/<%= roomType._id %>" class="btn btn-info">Xem Bình Luận</a>
+                    </td>   
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+
+<%- include('../main/footer.ejs') %>

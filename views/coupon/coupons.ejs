@@ -1,0 +1,186 @@
+<%- include('../main/header.ejs') %>
+
+    <div class="container">
+        <h1 class="my-4">Danh Sách Coupon</h1>
+
+        <!-- Thông báo nếu có -->
+        <% if (message) { %>
+            <div class="alert alert-warning" id="successMessage">
+                <%= message %>
+            </div>
+            <% } %>
+
+                <!-- Nút thêm coupon -->
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#couponModal"
+                    id="addCouponBtn">
+                    Thêm Coupon
+                </button>
+
+                <!-- Bảng danh sách coupon -->
+                <table id="couponTable" class="table table-striped table-bordered table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="text-center">Mã Coupon</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Giảm Giá (%)</th>
+                            <th class="text-center">Giảm Giá Tối Đa</th>
+                            <th class="text-center">Điều Kiện Tối Thiểu</th>
+                            <th class="text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <% coupons.forEach(coupon=> { %>
+                            <tr>
+                                <td>
+                                    <!-- Clicking on the coupon code will open the detail modal -->
+                                    <button class="btn btn-link btn-detail-coupon" data-id="<%= coupon._id %>"
+                                        data-code="<%= coupon.maGiamGia %>" data-status="<%= coupon.trangThai %>"
+                                        data-discount="<%= coupon.giamGia %>"
+                                        data-max-discount="<%= coupon.giamGiaToiDa %>"
+                                        data-min-condition="<%= coupon.dieuKienToiThieu %>"
+                                        data-start-date="<%= coupon.ngayBatDau %>"
+                                        data-end-date="<%= coupon.ngayHetHan %>" data-bs-toggle="modal"
+                                        data-bs-target="#detailCouponModal">
+                                        <%= coupon.maGiamGia %>
+                                    </button>
+                                </td>
+                                <td>
+                                    <% if (coupon.trangThai===0) { %>
+                                        <span class="badge bg-success">Còn hạn</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Hết hạn</span>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <%= (coupon.giamGia*100 ) %>%
+                                </td>
+                                <td>
+                                    <%= coupon.giamGiaToiDa.toLocaleString('vi-VN') %> VND
+                                </td>
+                                <td>
+                                    <%= coupon.dieuKienToiThieu.toLocaleString('vi-VN') %> VND
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn-edit-coupon" data-id="<%= coupon._id %>"
+                                        data-code="<%= coupon.maGiamGia %>" data-status="<%= coupon.trangThai %>"
+                                        data-discount="<%= coupon.giamGia %>"
+                                        data-max-discount="<%= coupon.giamGiaToiDa %>"
+                                        data-min-condition="<%= coupon.dieuKienToiThieu %>"
+                                        data-start-date="<%= coupon.ngayBatDau %>"
+                                        data-end-date="<%= coupon.ngayHetHan %>" data-bs-toggle="modal"
+                                        data-bs-target="#couponModal"><img src="/public/images/edit.png" alt="Sửa"
+                                            style="width: 24px; height: 24px;"></a>
+                                    <!-- <button class="btn btn-danger btn-sm btn-delete-coupon" data-id="<%= coupon._id %>"
+                            data-code="<%= coupon.maGiamGia %>" data-bs-toggle="modal"
+                            data-bs-target="#confirmDeleteModal">Xóa</button> -->
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+    </div>
+
+    <!-- Modal Thêm / Sửa Coupon -->
+    <div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="/web/coupons/post" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm Coupon</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="maGiamGia" class="form-label">Mã Coupon</label>
+                            <input type="text" class="form-control" id="maGiamGia" name="maGiamGia" required
+                                value="<%= formData ? formData.maGiamGia : '' %>" pattern="^[a-zA-Z0-9]+$"
+                                title="Chỉ được sử dụng chữ cái và số, không dấu cách hoặc ký tự đặc biệt">
+                            <% if (message) { %>
+                                <div class="alert alert-danger mt-2">
+                                    <%= message %>
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="giamGia" class="form-label">Giảm Giá % (1 -> 50%)</label>
+                            <input type="number" class="form-control" id="giamGia" name="giamGia" min="1" max="50"
+                                step="1" required value="<%= formData ? formData.giamGia : '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="giamGiaToiDa" class="form-label">Giảm Giá Tối Đa (VND)</label>
+                            <input type="number" class="form-control" id="giamGiaToiDa" name="giamGiaToiDa" min="0"
+                                required value="<%= formData ? formData.giamGiaToiDa : '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dieuKienToiThieu" class="form-label">Điều Kiện Tối Thiểu (VND)</label>
+                            <input type="number" class="form-control" id="dieuKienToiThieu" name="dieuKienToiThieu"
+                                min="0" required value="<%= formData ? formData.dieuKienToiThieu : '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ngayBatDau" class="form-label">Ngày Bắt Đầu</label>
+                            <input type="date" class="form-control" id="ngayBatDau" name="ngayBatDau" required
+                                value="<%= formData ? formData.ngayBatDau : '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ngayHetHan" class="form-label">Ngày Kết Thúc</label>
+                            <input type="date" class="form-control" id="ngayHetHan" name="ngayHetHan" required
+                                value="<%= formData ? formData.ngayHetHan : '' %>">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xem Chi Tiết Coupon -->
+    <div class="modal fade" id="detailCouponModal" tabindex="-1" aria-labelledby="detailCouponModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailCouponModalLabel">Chi Tiết Coupon</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Mã Coupon:</strong> <span id="detailCouponCode"></span></p>
+                    <p><strong>Trạng Thái:</strong> <span id="detailCouponStatus"></span></p>
+                    <p><strong>Giảm Giá:</strong> <span id="detailCouponDiscount"></span>%</p>
+                    <p><strong>Giảm Giá Tối Đa:</strong> <span id="detailCouponMaxDiscount"></span> VND</p>
+                    <p><strong>Điều Kiện Tối Thiểu:</strong> <span id="detailCouponMinCondition"></span> VND</p>
+                    <p><strong>Ngày Bắt Đầu:</strong> <span id="detailCouponStartDate"></span></p>
+                    <p><strong>Ngày Kết Thúc:</strong> <span id="detailCouponEndDate"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xác Nhận Xóa -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Xác Nhận Xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xóa mã <strong id="serviceName"></strong> này?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form id="confirmDeleteButton" method="POST">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../main/footer.ejs') %>
+        <%- include('../coupon/coupon_js.ejs') %>

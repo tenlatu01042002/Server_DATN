@@ -1,0 +1,286 @@
+.bi {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /*
+   * Sidebar
+   */
+  
+  @media (min-width: 768px) {
+    .sidebar .offcanvas-lg {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 48px;
+    }
+    .navbar-search {
+      display: block;
+    }
+  }
+  
+  .sidebar .nav-link {
+    font-size: .875rem;
+    font-weight: 500;
+  }
+  
+  .sidebar .nav-link.active {
+    color: #2470dc;
+  }
+  
+  .sidebar-heading {
+    font-size: .75rem;
+  }
+  
+  /*
+   * Navbar
+   */
+  
+  .navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    background-color: rgba(0, 0, 0, .25);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+  }
+  
+  .navbar .form-control {
+    padding: .75rem 1rem;
+  }
+  
+/* Thêm các kiểu cho ngày hiện tại */
+.today-event {
+  font-weight: bold; /* Tô đậm ngày hiện tại */
+  background-color: #f8d7da; /* Thay đổi màu nền nếu cần */
+}
+
+/* Thêm kiểu cho ngày nhận phòng và trả phòng */
+.highlight-day {
+  font-weight: bold; /* Tô đậm ngày nhận phòng và trả phòng */
+  background-color: #ffeeba; /* Màu nền cho ngày nhận phòng và trả phòng */
+  color: #d39e00; /* Màu chữ cho ngày nhận phòng và trả phòng */
+}
+
+/* Đặc biệt cho các sự kiện */
+.event-highlight {
+  background-color: #f44336; /* Màu nền sự kiện */
+  color: white; /* Màu chữ của sự kiện */
+}
+
+#customerImage img {
+  width: 150px;  /* Chiều rộng hình ảnh */
+  height: 150px; /* Chiều cao hình ảnh */
+  object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+  border-radius: 8px; /* Tạo bo góc cho hình ảnh */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ cho hình ảnh */
+}
+
+.modal-lg-custom {
+  max-width: 90%; /* Tùy chỉnh chiều rộng (90% màn hình) */
+}
+
+
+.card-title i {
+  margin-right: 8px;
+}
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.display-6 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+
+.card:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+.bieudochung {
+  max-width: 100%;
+  justify-content: space-around;
+  margin-left: 2px;
+  text-align: center;
+  
+}
+.chart-container {
+  text-align: center;
+  justify-content: space-between; 
+  align-items: center;    /* Căn giữa theo chiều dọc */
+  height: 70vh;           /* Đặt chiều cao của container */
+}
+
+#bieuDoDoanhThu {
+  max-width: 100%;         /* Đặt giới hạn chiều rộng */
+  max-height: 100%;        /* Đặt giới hạn chiều cao */
+}
+
+#bieuDoLuotDat {
+  max-width: 100%;
+  max-height: 70%;
+}
+
+.p-inline-container {
+  display: flex;
+  gap: 20px; /* Khoảng cách giữa các thẻ */
+  align-items: center; /* Căn giữa dọc */
+  flex-wrap: wrap; /* Xuống dòng nếu không đủ không gian */
+}
+
+.p-inline-container p {
+  margin: 0; /* Xóa khoảng cách mặc định của <p> */
+}
+
+#customerImage {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Hình ảnh căn chỉnh */
+#detailFrontImage,
+#detailBackImage {
+  display: flex;
+  flex-shrink: 0;
+  width: 200px;
+}
+
+.messageLogin {
+  position: fixed; /* Định vị cố định */
+  bottom: 20px; /* Cách dưới 20px */
+  right: 20px; /* Cách phải 20px */
+  z-index: 1050; /* Đảm bảo thông báo không bị các phần tử khác che khuất */
+  opacity: 1; /* Đảm bảo rằng thông báo không trong suốt */
+  transition: opacity 0.5s ease-out; /* Thêm hiệu ứng mờ dần */
+}
+
+/* Tùy chỉnh thêm nếu cần */
+.modal-body h5 {
+  margin-bottom: 20px;
+}
+
+.thongso {
+  border: 2px solid rgba(0, 0, 0, 0.1); /* Đường viền mờ */
+  border-radius: 12px; /* Bo góc */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow nhẹ */
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.bieudo {
+  border: 2px solid rgba(0, 0, 0, 0.1); /* Đường viền mờ */
+  border-radius: 12px; /* Bo góc */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow nhẹ */
+  padding: 10px;
+}
+
+.bang {
+  border: 2px solid rgba(0, 0, 0, 0.1); /* Đường viền mờ */
+  border-radius: 12px; /* Bo góc */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow nhẹ */
+  padding: 10px;
+}
+/* Lưới cho danh sách phòng */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Tạo các cột tự động, tối thiểu mỗi cột 150px */
+  gap: 10px; /* Khoảng cách giữa các ô phòng */
+}
+
+.room-grid .room-item {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 14px;
+}
+
+.room-grid .room-item span {
+  font-weight: bold;
+}
+
+.room-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.used-room {
+  background-color: #f8d7da;  /* Màu đỏ nhạt */
+  color: #e80a20;  /* Màu chữ đỏ */
+}
+
+.available-room {
+  background-color: #d4edda;  /* Màu xanh nhạt */
+  color: #11812b;  /* Màu chữ xanh */
+}
+
+header.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header.navbar .nav-item img:hover {
+  transform: scale(1.1); /* Hiệu ứng phóng to khi hover */
+}
+
+.bg-header {
+  background-color: #213A58;
+}
+
+.notification-item {
+  border: 1px solid #999999;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 5px;
+}
+
+.notification-item.unread {
+  position: relative;
+}
+
+.notification-item.unread::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+
+#notificationBadge {
+  position: absolute;
+  top: 12px; /* Gần sát mép trên của biểu tượng */
+  right: 2px; /* Gần sát mép phải của biểu tượng */
+  transform: translate(50%, -50%); /* Dịch chuyển vào bên trong biểu tượng */
+  width: 14px; /* Kích thước chấm đỏ */
+  height: 14px; /* Kích thước chấm đỏ */
+  border-radius: 50%; /* Bo tròn chấm đỏ */
+  background-color: red; /* Màu nền chấm đỏ */
+  padding: 0; /* Loại bỏ padding */
+  display: flex; /* Hiển thị dạng flex */
+  align-items: center; /* Căn giữa dọc */
+  justify-content: center; /* Căn giữa ngang */
+  color: white; /* Màu chữ bên trong (nếu cần) */
+  font-size: 8px; /* Kích thước chữ */
+}
+
+.notification-content {
+  flex-grow: 1;
+}
+
+.notification-content span {
+  font-size: 14px;
+}
+
+.notification-content small {
+  font-size: 12px;
+  color: #6c757d; /* Màu chữ xám */
+}
+

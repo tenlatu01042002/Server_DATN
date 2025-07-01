@@ -1,0 +1,97 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteButtons = document.querySelectorAll('.btn-block-nguoidung');
+        const serviceNameElement = document.getElementById('serviceName');
+        const actionTypeElement = document.getElementById('actionType');
+        const confirmDeleteForm = document.getElementById('confirmDeleteButton');
+        const blockUnblockButton = document.getElementById('blockUnblockButton');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const serviceId = button.getAttribute('data-id');
+                const serviceName = button.getAttribute('data-ten');
+                const serviceStatus = button.getAttribute('data-status');  // Lấy trạng thái hiện tại của người dùng (block/unblock)
+
+                // Cập nhật tên người dùng trong modal
+                serviceNameElement.textContent = serviceName;
+
+                // Cập nhật loại hành động (Block hoặc Unblock)
+                if (serviceStatus && serviceStatus === 'true') {
+                    actionTypeElement.textContent = 'Block'; // Nếu chưa block thì sẽ block
+                    blockUnblockButton.textContent = 'Block';
+                    blockUnblockButton.classList.remove('btn-primary');
+                    blockUnblockButton.classList.add('btn-danger');
+                } else {
+                    actionTypeElement.textContent = 'Unblock'; // Nếu đã block thì sẽ unblock
+                    blockUnblockButton.textContent = 'Unblock';
+                    blockUnblockButton.classList.remove('btn-danger');
+                    blockUnblockButton.classList.add('btn-primary');
+                }
+
+                // Cập nhật action của form để gửi request đến đúng route
+                confirmDeleteForm.action = `/web/nguoidungs/block?id=${serviceId}&trangThai=${serviceStatus}&_method=PUT`;
+
+            });
+        });
+    });
+
+
+</script>
+
+<script>
+    function getNguoiDungDetails(userId) {
+        fetch(`/web/nguoidungs/detail?id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const user = data.user;
+
+                    // Cập nhật thông tin cơ bản
+                    document.getElementById("detailName").innerText = user.tenNguoiDung || "N/A";
+                    document.getElementById("detailPhone").innerText = user.soDienThoai || "N/A";
+                    document.getElementById("detailEmail").innerText = user.email || "N/A";
+                    document.getElementById("detailStatus").innerText = user.trangThai ? "Hoạt động" : "Không hoạt động";
+
+                    // Hiển thị hình ảnh khách hàng
+                    const customerImageContainer = document.getElementById("customerImage");
+                    if (user.hinhAnh) {
+                        customerImageContainer.innerHTML = `<img src="${user.hinhAnh}" alt="Hình ảnh khách hàng" />`;
+                    } else {
+                        customerImageContainer.innerHTML = "Chưa có hình ảnh";
+                    }
+
+                    // Cập nhật thông tin CCCD
+                    const cccd = user.cccd || {};
+                    document.getElementById("detailCCCD").innerText = cccd.soCCCD || "Chưa xác thực";
+                    document.getElementById("detailFullName").innerText = cccd.hoTen || "Chưa xác thực";
+                    document.getElementById("detailDOB").innerText = cccd.ngaySinh || "Chưa xác thực";
+                    document.getElementById("detailGender").innerText = cccd.gioiTinh || "Chưa xác thực";
+                    document.getElementById("detailHometown").innerText = cccd.noiThuongTru || "Chưa xác thực";
+                    document.getElementById("detailIssuedDate").innerText = cccd.ngayCap || "Chưa xác thực";
+
+                    // Cập nhật hình ảnh
+                    const frontImageContainer = document.getElementById("detailFrontImage");
+                    const backImageContainer = document.getElementById("detailBackImage");
+
+                    frontImageContainer.innerHTML = cccd.anhMatTruoc
+                        ? `<a href="${cccd.anhMatTruoc}" target="_blank">
+                                <img src="${cccd.anhMatTruoc}" alt="Ảnh mặt trước" class="img-thumbnail" style="width: 300px;">
+                            </a>`
+                        : "Chưa có ảnh";
+
+                    backImageContainer.innerHTML = cccd.anhMatSau
+                        ? `<a href="${cccd.anhMatSau}" target="_blank">
+                                <img src="${cccd.anhMatSau}" alt="Ảnh mặt sau" class="img-thumbnail" style="width: 300px;">
+                            </a>`
+                        : "Chưa có ảnh";
+                } else {
+                    alert("Không thể lấy thông tin chi tiết người dùng.");
+                }
+            })
+            .catch(err => {
+                console.error("Lỗi khi lấy thông tin chi tiết người dùng:", err);
+                alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+            });
+    }
+
+</script>

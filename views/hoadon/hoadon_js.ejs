@@ -1,0 +1,176 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Lắng nghe nút cập nhật trạng thái
+        document.querySelectorAll('.btn-update-status').forEach(button => {
+            button.addEventListener('click', async () => {
+                const id = button.getAttribute('data-id');
+                const newStatus = parseInt(button.getAttribute('data-new-status'), 10);
+
+                // Xác nhận người dùng
+                const confirmMessage = `Bạn có chắc chắn muốn cập nhật trạng thái hóa đơn này không?`;
+                if (!confirm(confirmMessage)) return;
+
+                // Gửi yêu cầu cập nhật
+                try {
+                    const response = await fetch(`/web/hoadons/update-status/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ trangThai: newStatus }),
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Cập nhật trạng thái thành công!');
+                        window.location.reload(); // Reload trang
+                    } else {
+                        alert(`Cập nhật thất bại: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            });
+        });
+    });
+
+
+
+    // Gọi API để lấy chi tiết hóa đơn
+    async function getHoaDonDetails(id) {
+        try {
+            const response = await fetch(`/web/hoadons/detail/${id}`);
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById('hoadonDetailsContainer').innerHTML = `
+                <div class="alert alert-danger">${data.message}</div>
+            `;
+                return;
+            }
+
+            // Tạo nội dung chi tiết hóa đơn
+            const hoadon = data.hoadon;
+            const chiTiet = hoadon.chiTiet
+                .map(
+                    (ct) => `
+                <tr>
+                    <td>${ct.soPhong}</td>
+                    <td>${ct.tenLoaiPhong}</td>
+                    <td>${ct.soLuongKhach}</td>
+                    <td>${ct.VIP ? '300.000 VNĐ' : 'Không'}</td>
+                    <td>${ct.buaSang ? '150.000 VNĐ' : 'Không'}</td>
+                    <td>${ct.soDem}</td>
+                    <td>${ct.giaPhong.toLocaleString()} VNĐ</td>
+                </tr>
+            `
+                )
+                .join('');
+
+            const modalContent = `
+
+            <div class="p-inline-container">
+                <p><strong>Khách hàng:</strong> ${hoadon.id_NguoiDung.tenNguoiDung}</p>
+                <p><strong>Email:</strong> ${hoadon.id_NguoiDung.email}</p>
+            </div> 
+
+            <div class="p-inline-container">
+                <p><strong>Tổng số phòng:</strong> ${hoadon.tongPhong}</p>
+                <p><strong>Tổng số khách:</strong> ${hoadon.tongKhach}</p>
+            </div> 
+
+            <div class="p-inline-container">
+                <p><strong>Ngày nhận phòng:</strong> ${hoadon.ngayNhanPhong}</p>
+                <p><strong>Ngày trả phòng:</strong> ${hoadon.ngayTraPhong}</p>
+            </div> 
+
+            <p><strong>Ngày tạo đơn:</strong> ${hoadon.createdAt}</p>
+            <p style="color: 
+                ${hoadon.trangThai === 1 ? 'green' : 
+                hoadon.trangThai === 0 ? 'blue' : 
+                hoadon.trangThai === 2 ? 'red' : 
+                'gray'}">
+                <strong>Trạng thái hóa đơn: 
+                ${
+                    hoadon.trangThai === 1 ? 'Đã thanh toán' :
+                    hoadon.trangThai === 0 ? 'Đã nhận phòng' :
+                    hoadon.trangThai === 2 ? 'Đã hủy' :
+                    'Đã trả phòng'
+                }
+                    </strong>
+            </p>
+            
+            <p><strong>Ngày thanh toán:</strong> ${hoadon.ngayThanhToan}  </p>
+
+            <h5 class="modal-header">Các phòng đã đặt</h5>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Số phòng</th>
+                        <th>Loại phòng</th>
+                        <th>Số lượng khách</th>
+                        <th>VIP</th>
+                        <th>Bữa sáng</th>
+                        <th>Số đêm</th>
+                        <th>Giá phòng</th>
+                    </tr>
+                </thead>
+                <tbody>${chiTiet}</tbody>
+            </table>
+
+            <p><strong>Mã giảm giá:</strong> ${hoadon.id_Coupon?.maGiamGia ? hoadon.id_Coupon?.maGiamGia : "không"}</p>
+            <p style="color: green;"
+            ><strong>Tổng tiền: ${hoadon.tongTien.toLocaleString()} VNĐ </strong></p>
+        `;
+
+            document.getElementById('hoadonDetailsContainer').innerHTML = modalContent;
+        } catch (error) {
+            console.error('Error fetching details:', error);
+            document.getElementById('hoadonDetailsContainer').innerHTML = `
+            <div class="alert alert-danger">Lỗi khi tải dữ liệu chi tiết hóa đơn.</div>
+        `;
+        }
+    }
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const cancelButtons = document.querySelectorAll(".btn-huy-hoadon");
+        const cancelForm = document.getElementById("cancelHoaDonForm");
+        const maHoaDonElement = document.getElementById('maHoaDon');
+
+
+        cancelButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const hoaDonId = button.getAttribute("data-id");
+                const trangThai = button.getAttribute("data-trangthai");
+                const maHoaDon = button.getAttribute("data-maHoaDon");
+
+                maHoaDonElement.textContent = maHoaDon;
+
+                if (trangThai == 2) {
+                    alert("Hóa đơn đã được hủy trước đó.");
+                    return;
+                }
+
+                // Thiết lập action cho form
+                cancelForm.action = `/web/hoadons/huy/${hoaDonId}?_method=PUT`;
+            });
+        });
+    });
+</script>
+
+<script>
+    function submitFilter() {
+        const trangThai = document.getElementById('filterTrangThai').value;
+        const queryParams = new URLSearchParams(window.location.search);
+        if (trangThai) {
+            queryParams.set('trangThai', trangThai);
+        } else {
+            queryParams.delete('trangThai');
+        }
+        window.location.search = queryParams.toString(); // Tải lại trang với query params
+    }
+</script>

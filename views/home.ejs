@@ -1,0 +1,185 @@
+<%- include('main/header.ejs') %>
+
+    <!-- Include the statistics dashboard and pass the results object -->
+    <%- include('./thongke/thongso', { results: results }) %>
+        <div class="row mt-5 bieudochung">
+            <% if (!bieuDoData || Object.keys(bieuDoData).length===0) { %>
+                <p>Không có dữ liệu thống kê doanh số hiển thị biểu đồ.</p>
+                <% } else { %>
+                    <!-- Biểu đồ doanh thu -->
+                    <div class="col-md-8 chart-container bieudo">
+                        <h5 class="mb-3">Biểu đồ doanh thu từng loại phòng theo tháng của năm <span id="currentYear"></span></h5>
+                        <canvas id="bieuDoDoanhThu"></canvas>
+                    </div>
+                    <% } %>
+            <% if (!luotDatLoaiPhong || Object.keys(luotDatLoaiPhong).length===0) { %>
+                <p>Không có dữ liệu thống kê lượt đặt.</p>
+                <% } else { %>
+                    <!-- Biểu đồ tròn lượt đặt -->
+                    <div class="col-md-4 chart-container bieudo">
+                        <h5 class="mb-3">Tỉ lệ số lượt đặt theo loại phòng</h5>
+                        <canvas id="bieuDoLuotDat"></canvas>
+                    </div>
+                    <% } %>
+        </div>
+
+        <div class="row mt-5 bieudochung mb-5">
+            <!-- Bảng Top 10 Khách Hàng Tiềm Năng -->
+            <div class="col-md-6 bang">
+                <h3>Top 10 Khách Hàng Tiềm Năng</h3>
+                <table class="table table-striped no-datatable ">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tên Khách Hàng</th>
+                            <th>Email</th>
+                            <th>Số Lần Đặt Phòng</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <% topKhachHang.forEach((khachHang, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= khachHang.tenNguoiDung %></td>
+                            <td><%= khachHang.email %></td>
+                            <td><%= khachHang.soLanDatPhong %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        
+            <!-- Bảng Top 10 Loại Phòng Được Đánh Giá Cao Nhất -->
+            <div class="col-md-6 bang">
+                <h3>Top 10 Loại Phòng Được Đánh Giá Cao Nhất</h3>
+                <table class="table table-striped no-datatable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tên Loại Phòng</th>
+                            <th>Giá Tiền</th>
+                            <th>Số Lượt Đánh Giá</th>
+                            <th>Điểm Trung Bình</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <% topLoaiPhong.forEach((loaiPhong, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= loaiPhong.tenLoaiPhong %></td>
+                            <td><%= Number(loaiPhong.giaTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                            <td><%= loaiPhong.soLuongDanhGia %></td>
+                            <td><%= loaiPhong.diemTrungBinh %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script>
+            const bieuDoData = <%- JSON.stringify(bieuDoData || {}) %>;
+            const labels = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
+
+            // Kiểm tra dữ liệu trước khi vẽ biểu đồ
+            console.log("Dữ liệu từ backend:", bieuDoData);
+
+            const datasets = Object.keys(bieuDoData).map((loaiPhong) => ({
+                label: loaiPhong,
+                data: bieuDoData[loaiPhong],
+                borderColor: getRandomColor(),
+                backgroundColor: getRandomColor(0.5),
+                tension: 0.4, // Làm mượt đường (giá trị từ 0 đến 1, càng cao càng mượt)
+                fill: true,
+            }));
+
+            // Đảm bảo dữ liệu đúng trước khi vẽ
+            console.log("Datasets:", datasets);
+            console.log("Labels:", labels);
+
+            new Chart(document.getElementById("bieuDoDoanhThu"), {
+                type: "line",
+                data: {
+                    labels,
+                    datasets,
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: "top" },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Tháng",
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Doanh thu (VNĐ)",
+                            },
+                        },
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4, // Tùy chọn làm mượt đường toàn cục
+                        },
+                        point: {
+                            radius: 4, // Kích thước điểm
+                            hoverRadius: 6, // Kích thước điểm khi hover
+                        },
+                    },
+                },
+            });
+
+            const luotDatLoaiPhong = <%- JSON.stringify(luotDatLoaiPhong || {}) %>;
+
+            // Chuẩn bị dữ liệu cho biểu đồ tròn
+            const pieLabels = Object.keys(luotDatLoaiPhong);
+            const pieData = Object.values(luotDatLoaiPhong);
+
+            // Tính tổng số lượt đặt
+            const totalBookings = pieData.reduce((acc, value) => acc + value, 0);
+
+            // Vẽ biểu đồ tròn
+            new Chart(document.getElementById("bieuDoLuotDat"), {
+                type: "pie",
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: pieLabels.map(() => getRandomColor()),
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const value = context.raw;
+                                    const percentage = ((value / totalBookings) * 100).toFixed(2);
+                                    return `${context.label}: ${value} lượt (${percentage}%)`;
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            function getRandomColor(opacity = 1) {
+                const r = Math.floor(Math.random() * 255);
+                const g = Math.floor(Math.random() * 255);
+                const b = Math.floor(Math.random() * 255);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+
+            document.getElementById("currentYear").textContent = new Date().getFullYear();
+        </script>
+
+                <%- include('main/footer.ejs') %>

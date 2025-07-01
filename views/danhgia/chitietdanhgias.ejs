@@ -1,0 +1,95 @@
+<%- include('../main/header.ejs') %>
+
+<div class="container">
+    <h1>Bình luận cho loại phòng: <%= roomType.tenLoaiPhong %></h1>
+    
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Tên người dùng</th>
+                <th>Số điểm</th>
+                <th>Bình luận</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% reviews.forEach(review => { %>
+                <tr id="review-<%= review._id %>">
+                    <td><%= review.id_NguoiDung.tenNguoiDung %></td>
+                    <td><%= review.soDiem %></td>
+                    <td><%= review.binhLuan %></td>
+                    <td><%= new Date(review.createdAt).toLocaleDateString() %></td>
+                    <td>
+                        <button class="btn <%= review.trangThai ? 'btn-success' : 'btn-danger' %>" 
+                            onclick="showConfirmationModal('<%= review._id %>', <%= review.trangThai %>)">
+                            <%= review.trangThai ? 'Ẩn' : 'Hiện' %>
+                        </button>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</div>
+
+<%- include('../main/footer.ejs') %>
+
+
+<!-- Modal xác nhận -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Xác nhận thay đổi trạng thái</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn thay đổi trạng thái của bình luận này?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="confirmActionButton">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    let reviewIdToUpdate;
+    let newStatusToUpdate;
+
+    function showConfirmationModal(reviewId, currentStatus) {
+        // Hiển thị modal xác nhận
+        reviewIdToUpdate = reviewId;
+        newStatusToUpdate = !currentStatus; // Đảo trạng thái
+        const statusText = newStatusToUpdate ? 'Ẩn' : 'Hiện';
+        document.getElementById('confirmationModalLabel').textContent = `Xác nhận ${statusText}`;
+        new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+    }
+
+    document.getElementById('confirmActionButton').addEventListener('click', function() {
+        // Gửi yêu cầu PUT khi xác nhận
+        fetch(`/web/danhgias/put/${reviewIdToUpdate}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trangThai: newStatusToUpdate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Load lại trang sau khi thực hiện thay đổi
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi thay đổi trạng thái bình luận');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+
+        // Đóng modal sau khi thực hiện thay đổi
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+        modal.hide();
+    });
+</script>
+

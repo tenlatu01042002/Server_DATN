@@ -1,0 +1,44 @@
+html,
+body {
+  height: 100%;
+  background-image: url('../images/backg1.jpg'); /* Đường dẫn ảnh */
+  background-size: cover; /* Làm cho ảnh phủ kín màn hình */
+  background-position: center; /* Căn giữa ảnh */
+  background-attachment: fixed; /* Giữ ảnh cố định khi cuộn trang */
+}
+
+.form-signin {
+  max-width: 400px;
+  padding: 1rem;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border: 0px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  background-color: rgba(179, 185, 225, 0.5); /* Màu nền với độ trong suốt */
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 50px;
+  border: 0px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background-color: rgba(179, 185, 225, 0.5); /* Màu nền với độ trong suốt */
+}
+
+/* Cải thiện độ mờ cho form đăng nhập để dễ nhìn */
+.form-signin {
+  border-color: rgb(252, 252, 252);
+  border: 9px;
+  background-color: rgba(255, 255, 255, 0.5); /* Màu nền với độ trong suốt */
+  padding: 30px;
+  border-radius: 8px; /* Bo góc cho form */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); /* Thêm bóng đổ cho form */
+}
+

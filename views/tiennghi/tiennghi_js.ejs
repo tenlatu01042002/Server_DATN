@@ -1,0 +1,65 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteButtons = document.querySelectorAll('.btn-delete-tiennghi');
+        const serviceNameElement = document.getElementById('serviceName');
+        const confirmDeleteForm = document.getElementById('confirmDeleteButton'); // Đây là form, không phải link
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const serviceId = button.getAttribute('data-id');
+                const serviceName = button.getAttribute('data-ten');
+
+                // Cập nhật tên dịch vụ trong modal
+                serviceNameElement.textContent = serviceName;
+
+                // Cập nhật action của form
+                confirmDeleteForm.action = `/web/tiennghis/delete/${serviceId}?_method=DELETE`;
+            });
+        });
+    });
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editButtons = document.querySelectorAll('.btn-edit-tiennghi');
+        const serviceForm = document.getElementById('serviceForm');
+        const serviceModalLabel = document.getElementById('serviceModalLabel');
+        const currentImageContainer = document.getElementById('currentImage');
+        const currentImagePreview = document.getElementById('currentImagePreview');
+
+        // Khi nhấn nút "Sửa"
+        editButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const serviceId = button.getAttribute('data-id');
+                const serviceName = button.getAttribute('data-ten');
+                const serviceImage = button.getAttribute('data-hinhanh');
+
+                // Đặt action của form là PUT cho cập nhật dịch vụ
+                serviceForm.action = `/web/tiennghis/put/${serviceId}?_method=PUT`;
+                // Đặt tiêu đề modal là "Cập nhật dịch vụ"
+                serviceModalLabel.textContent = 'Cập nhật dịch vụ';
+
+                // Điền các thông tin vào form
+                document.getElementById('tenTienNghi').value = serviceName;
+
+                // Nếu có hình ảnh cũ, hiển thị ảnh đó
+                if (serviceImage) {
+                    currentImageContainer.style.display = 'block'; // Hiển thị ảnh cũ
+                    currentImagePreview.src = serviceImage; // Đặt src cho ảnh cũ
+                } else {
+                    currentImageContainer.style.display = 'none'; // Ẩn ảnh cũ nếu không có
+                }
+            });
+        });
+
+        // Reset form khi đóng modal
+        const serviceModal = document.getElementById('serviceModal');
+        serviceModal.addEventListener('hidden.bs.modal', () => {
+            // Reset dữ liệu trong các trường nhập liệu và ảnh
+            serviceForm.reset(); // Reset tất cả các trường input
+            currentImageContainer.style.display = 'none'; // Ẩn ảnh cũ
+            currentImagePreview.src = ''; // Xóa hình ảnh hiển thị
+        });
+    });
+</script>

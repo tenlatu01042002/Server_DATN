@@ -1,0 +1,263 @@
+<%- include('../main/header.ejs') %>
+
+<div class="container">
+    <h1 class="my-4">Danh sách Nhà Hàng</h1>
+
+    <!-- Thông báo nếu có -->
+    <% if (message) { %>
+        <div class="alert alert-warning" id="successMessage">
+            <%= message %>
+        </div>
+    <% } %>
+
+    <!-- Nút thêm nhà hàng -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#amthucModal"
+        id="addAmThucBtn">Thêm Nhà Hàng</button>
+
+    <!-- Bảng danh sách nhà hàng -->
+    <table id="amthucTable" class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th class="text-center">Tên Nhà Hàng</th>
+                <th class="text-center">Mô Tả</th>
+                <th class="text-center">Hình Ảnh</th>
+                <th class="text-center">Hành Động</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            <% amthucs.forEach(amthuc => { %>
+                <tr>
+                    <td>
+                        <a href="#" class="btn-detail-amthuc text-decoration-none"
+                            data-id="<%= amthuc._id %>" data-ten="<%= amthuc.tenNhaHang %>"
+                            data-mota="<%= amthuc.moTa %>" data-hinhanh="<%= amthuc.hinhAnh %>"
+                            data-hinhmenu="<%= JSON.stringify(amthuc.menu || []) %>"
+                            data-giomocua="<%= amthuc.gioMoCua %>"
+                            data-giodongcua="<%= amthuc.gioDongCua %>" data-viTri="<%= amthuc.viTri %>"
+                            data-hotline="<%= amthuc.hotline %>" data-bs-toggle="modal"
+                            data-bs-target="#detailModal">
+                            <%= amthuc.tenNhaHang %>
+                        </a>
+                    </td>
+                    <td>
+                        <% if (amthuc.moTa) { %>
+                            <p>
+                                <%= amthuc.moTa.slice(0, 100) %>...
+                            </p>
+                        <% } else { %>
+                            <p>Không có mô tả</p>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (amthuc.hinhAnh) { %>
+                            <img src="<%= amthuc.hinhAnh %>" class="img-fluid" style="max-width: 120px;">
+                        <% } else { %>
+                            <span>Không có ảnh</span>
+                        <% } %>
+                    </td>
+                    <td class="text-center">
+                        <a class=" btn-sm btn-edit-amthuc" data-id="<%= amthuc._id %>"
+                            data-ten="<%= amthuc.tenNhaHang %>" data-mota="<%= amthuc.moTa %>"
+                            data-hinhanh="<%= amthuc.hinhAnh %>" data-hinhmenu="<%= amthuc.menu %>"
+                            data-giomocua="<%= amthuc.gioMoCua %>"
+                            data-giodongcua="<%= amthuc.gioDongCua %>" data-viTri="<%= amthuc.viTri %>"
+                            data-hotline="<%= amthuc.hotline %>" data-bs-toggle="modal"
+                            data-bs-target="#amthucModal"><img src="/public/images/edit.png" alt="Sửa"
+                            style="width: 24px; height: 24px;"></a>
+                        <a class="btn-sm btn-delete-amthuc" data-id="<%= amthuc._id %>"
+                            data-ten="<%= amthuc.tenNhaHang %>" data-bs-toggle="modal"
+                            data-bs-target="#confirmDeleteModal"><img src="/public/images/delete.png" alt="Xóa"
+                            style="width: 24px; height: 24px;"></a>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Xem Chi Tiết -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Chi Tiết Nhà Hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 id="tenNhaHangDetail" class="mb-3"></h5>
+                        <img id="hinhAnhDetail" class="img-fluid mb-3" style="max-height: 300px; object-fit: cover;" />
+                        <p id="moTaDetail"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Menu</h5>
+                        <div id="hinhMenuDetail" class="row g-2"></div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <p><strong>Giờ Mở Cửa:</strong> <span id="gioMoCuaDetail"></span></p>
+                        <p><strong>Giờ Đóng Cửa:</strong> <span id="gioDongCuaDetail"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Vị Trí:</strong> <span id="viTriDetail"></span></p>
+                        <p><strong>Hotline:</strong> <span id="hotlineDetail"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Thêm / Sửa Nhà Hàng -->
+<div class="modal fade" id="amthucModal" tabindex="-1" aria-labelledby="amthucModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="amthucForm" action="/web/amthucs/post" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="amthucModalLabel">Thêm/Sửa Nhà Hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="amthucId" name="id" />
+                    <div class="mb-3">
+                        <label for="tenNhaHang" class="form-label">Tên Nhà Hàng</label>
+                        <input type="text" class="form-control" id="tenNhaHang" name="tenNhaHang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moTa" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="moTa" name="moTa" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-48">
+                            <label for="images" class="form-label">Hình Ảnh Chính</label>
+                            <input type="file" class="form-control" id="images" name="images" accept="image/*" required>
+                        </div>
+                        <div class="w-48">
+                            <label for="menu" class="form-label">Hình Ảnh Phụ (Tối đa 5 ảnh)</label>
+                            <input type="file" class="form-control" id="menu" name="menu" accept="image/*" multiple>
+                            <div id="fileError" class="text-danger"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-50 me-2">
+                            <label for="gioMoCua" class="form-label">Giờ Mở Cửa</label>
+                            <input type="text" class="form-control" id="gioMoCua" name="gioMoCua" required>
+                        </div>
+                        <div class="w-50 ms-2">
+                            <label for="gioDongCua" class="form-label">Giờ Đóng Cửa</label>
+                            <input type="text" class="form-control" id="gioDongCua" name="gioDongCua" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-50 me-2">
+                            <label for="viTri" class="form-label">Vị Trí</label>
+                            <input type="text" class="form-control" id="viTri" name="viTri" required>
+                        </div>
+                        <div class="w-50 ms-2">
+                            <label for="hotline" class="form-label">Hotline</label>
+                            <input type="text" class="form-control" id="hotline" name="hotline" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Thêm / Sửa Nhà Hàng -->
+<div class="modal fade" id="amthucModal" tabindex="-1" aria-labelledby="amthucModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="amthucForm" action="/web/amthucs/post" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="amthucModalLabel">Thêm/Sửa Nhà Hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="amthucId" name="id" />
+                    <div class="mb-3">
+                        <label for="tenNhaHang" class="form-label">Tên Nhà Hàng</label>
+                        <input type="text" class="form-control" id="tenNhaHang" name="tenNhaHang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moTa" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="moTa" name="moTa" rows="3" required></textarea>
+                    </div>
+                    <!-- Dòng chứa hình ảnh chính và hình ảnh menu -->
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-48">
+                            <label for="images" class="form-label">Hình Ảnh Chính</label>
+                            <input type="file" class="form-control" id="images" name="images" accept="image/*">
+                            <img id="currentImage" class="img-fluid mt-2" style="max-height: 150px;" />
+                        </div>
+                        <div class="w-48">
+                            <label for="menu" class="form-label">Hình Ảnh Phụ (Tối đa 5 ảnh)</label>
+                            <input type="file" class="form-control" id="menu" name="menu" accept="image/*" multiple>
+                            <div id="fileError" class="text-danger"></div>
+                            <div id="currentMenuImages"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-50 me-2">
+                            <label for="gioMoCua" class="form-label">Giờ Mở Cửa</label>
+                            <input type="text" class="form-control" id="gioMoCua" name="gioMoCua" required>
+                        </div>
+                        <div class="w-50 ms-2">
+                            <label for="gioDongCua" class="form-label">Giờ Đóng Cửa</label>
+                            <input type="text" class="form-control" id="gioDongCua" name="gioDongCua" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div class="w-50 me-2">
+                            <label for="viTri" class="form-label">Vị Trí</label>
+                            <input type="text" class="form-control" id="viTri" name="viTri" required>
+                        </div>
+                        <div class="w-50 ms-2">
+                            <label for="hotline" class="form-label">Hotline</label>
+                            <input type="text" class="form-control" id="hotline" name="hotline" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Xác Nhận Xóa -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa nhà hàng <strong id="amThucName"></strong> không?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="confirmDeleteButton" method="POST">
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./amthuc_js.ejs') %>
+<%- include('../main/footer.ejs') %>

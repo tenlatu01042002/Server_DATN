@@ -1,0 +1,161 @@
+<%- include('../main/header.ejs') %>
+
+    <div class="container">
+        <h1>Danh sách Hóa đơn</h1>
+
+        <% if (message) { %>
+            <div class="alert alert-warning" id="successMessage">
+                <%= message %>
+            </div>
+            <% } %>
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <button class="" data-bs-toggle="modal" data-bs-target="#serviceModal"
+                    id="addServiceBtn">
+                    
+                </button>
+
+                <div class="d-flex align-items-center">
+                    <label for="filterTrangThai" class="form-label me-2">Lọc theo trạng thái</label>
+                    <select class="form-select" id="filterTrangThai" name="trangThai" onchange="submitFilter()"
+                        style="width: 200px;">
+                        <option value="" <%=trangThai==='' ? 'selected' : '' %>>Tất cả</option>
+                        <option value="0" <%=trangThai==='0' ? 'selected' : '' %>>Đã nhận phòng</option>
+                        <option value="1" <%=trangThai==='1' ? 'selected' : '' %>>Đã thanh toán</option>
+                        <option value="2" <%=trangThai==='2' ? 'selected' : '' %>>Đã hủy</option>
+                        <option value="3" <%=trangThai==='3' ? 'selected' : '' %>>Đã trả phòng</option>
+                    </select>
+                </div>
+            </div>
+
+                <table id="dichVuTable" class="table table-striped table-bordered table-hover mt-3">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="text-center" style="width: 180px">Mã hóa đơn</th>
+                            <th class="text-center" style="width: 180px">Khách hàng</th>
+                            <th class="text-center" style="width: 120px">Tổng tiền</th>
+                            <th class="text-center" style="width: 140px">Ngày nhận phòng</th>
+                            <th class="text-center" style="width: 140px">Ngày trả phòng</th>
+                            <th class="text-center" style="width: 120px">Trạng thái</th>
+                            <th class="text-center" style="width: 140px">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <% hoadons.forEach(hoadon=> { %>
+                            <tr>
+                                <td>
+                                    <%= hoadon.maHoaDon %>
+                                </td>
+                                <td>
+                                    <%= hoadon.id_NguoiDung ? hoadon.id_NguoiDung?.tenNguoiDung : 'Không xác định' %>
+                                </td>
+                                <td>
+                                    <%= hoadon.tongTien %> VNĐ
+                                </td>
+                                <td>
+                                    <%= hoadon.ngayNhanPhong %>
+                                </td>
+                                <td>
+                                    <%= hoadon.ngayTraPhong %>
+                                </td>
+                                <td>
+                                    <% let statusText='' , bg='' ; if (hoadon.trangThai===0) {
+                                        statusText='Đã nhận phòng' ; bg='bg-info' ; } else if (hoadon.trangThai===1) {
+                                        statusText='Đã thanh toán' ; bg='bg-success' ; } else if (hoadon.trangThai===2)
+                                        { statusText='Đã hủy' ; bg='bg-danger' ; } else if (hoadon.trangThai===3) {
+                                        statusText='Đã trả phòng' ; bg='bg-secondary' ; } %>
+                                        <span class="badge <%= bg %>">
+                                            <%= statusText %>
+                                        </span>
+
+                                </td>
+
+                                <td class="text-center">
+                                    <a href="javascript:void(0)" onclick="getHoaDonDetails('<%= hoadon._id %>')"
+                                        data-bs-toggle="modal" data-bs-target="#detailsModal">
+                                        <img src="/public/images/eye.png" alt="Chi tiết"
+                                            style="width: 24px; height: 24px;"></a>
+
+                                    <% if (hoadon.trangThai===1) { %>
+                                        <button class="btn btn-sm btn-primary btn-update-status"
+                                            data-id="<%= hoadon._id %>" data-new-status="0">
+                                            Nhận phòng
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-update-status"
+                                            data-id="<%= hoadon._id %>" data-new-status="2">
+                                            Hủy
+                                        </button>
+                                        <% } else if (hoadon.trangThai===0) { %>
+                                            <button class="btn btn-sm btn-success btn-update-status"
+                                                data-id="<%= hoadon._id %>" data-new-status="3">
+                                                Trả phòng
+                                            </button>
+                                            <% } %>
+                                </td>
+
+                            </tr>
+                            <% }); %>
+                    </tbody>
+
+                </table>
+    </div>
+
+    <!-- Modal Chi tiết hóa đơn -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-lg-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Chi tiết hóa đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="hoadonDetailsContainer">
+                        <p>Đang tải chi tiết hóa đơn...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Hủy Hóa Đơn -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Xác nhận hủy hóa đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn hủy hóa đơn <strong id="maHoaDon"></strong> không?</p>
+                    <form id="cancelHoaDonForm" method="POST">
+                        <input type="hidden" name="_method" value="PUT">
+                    </form>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger" form="cancelHoaDonForm">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <% if (message) { %>
+        <script>
+            setTimeout(function () {
+                var messageElement = document.getElementById("successMessage");
+                if (messageElement) {
+                    messageElement.style.display = "none"; // Ẩn thông báo sau 2 giây
+                }
+            }, 2000);
+        </script>
+        <% } %>
+
+            <%- include('../main/footer.ejs') %>
+                <%- include('./hoadon_js.ejs') %>

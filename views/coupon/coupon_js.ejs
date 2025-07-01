@@ -1,0 +1,98 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    // Handle Edit Coupon button click
+    document.querySelectorAll('.btn-edit-coupon').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            const code = this.dataset.code;
+            
+            const discount = this.dataset.discount;
+            const maxDiscount = this.dataset.maxDiscount;
+            const minCondition = this.dataset.minCondition;
+            const startDate = this.dataset.startDate;
+            const endDate = this.dataset.endDate;
+
+            
+
+            document.getElementById('couponId').value = id;
+            document.getElementById('maGiamGia').value = code;
+            
+            document.getElementById('giamGia').value = discount*100;
+            document.getElementById('giamGiaToiDa').value = maxDiscount;
+            document.getElementById('dieuKienToiThieu').value = minCondition;
+            document.getElementById('ngayBatDau').value = startDate.split('T')[0];
+            document.getElementById('ngayHetHan').value = endDate.split('T')[0];
+
+            // Update the form action
+            document.getElementById('couponForm').action = `/web/coupons/put/${id}?_method=PUT`;
+            document.getElementById('couponModalLabel').textContent = 'Sửa Coupon';
+        });
+    });
+
+    // Adjust form behavior when adding a new coupon
+    document.getElementById('addCouponBtn').addEventListener('click', function () {
+        document.getElementById('couponForm').reset();
+        document.getElementById('couponForm').action = '/web/coupons/post';
+        document.getElementById('couponModalLabel').textContent = 'Thêm Coupon';
+    });
+
+
+
+    
+
+
+    
+        const deleteButtons = document.querySelectorAll('.btn-delete-coupon');
+        const serviceNameElement = document.getElementById('serviceName');
+        const confirmDeleteForm = document.getElementById('confirmDeleteButton'); // Đây là form, không phải link
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const serviceId = button.getAttribute('data-id');
+                const serviceName = button.getAttribute('data-code');
+
+                // Cập nhật tên dịch vụ trong modal
+                serviceNameElement.textContent = serviceName;
+
+                // Cập nhật action của form
+                confirmDeleteForm.action = `/web/coupons/delete/${serviceId}?_method=DELETE`;
+            });
+        });
+    
+
+
+
+
+    // Display coupon details in modal when clicking on a coupon code
+    document.querySelectorAll('.btn-detail-coupon').forEach(button => {
+        button.addEventListener('click', function () {
+            const code = this.dataset.code;
+            const status = this.dataset.status;
+            const discount = this.dataset.discount;
+            const maxDiscount = this.dataset.maxDiscount;
+            const minCondition = this.dataset.minCondition;
+            const startDate = this.dataset.startDate;
+            const endDate = this.dataset.endDate;
+
+            document.getElementById('detailCouponCode').textContent = code;
+            document.getElementById('detailCouponStatus').textContent = status === '0' ? 'Còn hạn' : 'Hết hạn';
+            document.getElementById('detailCouponDiscount').textContent = (discount * 100);
+            document.getElementById('detailCouponMaxDiscount').textContent = maxDiscount;
+            document.getElementById('detailCouponMinCondition').textContent = minCondition;
+            document.getElementById('detailCouponStartDate').textContent = startDate.split('T')[0];
+            document.getElementById('detailCouponEndDate').textContent = endDate.split('T')[0];
+        });
+    });
+});
+
+document.getElementById('couponForm').addEventListener('submit', function (event) {
+    const couponCode = document.getElementById('maGiamGia').value;
+    const validPattern = /^[a-zA-Z0-9]+$/;
+    if (!validPattern.test(couponCode)) {
+        event.preventDefault();
+        alert('Mã coupon không hợp lệ. Chỉ được sử dụng chữ cái, số, không dấu cách hoặc ký tự đặc biệt.');
+        return;
+    }
+});
+
+</script>
